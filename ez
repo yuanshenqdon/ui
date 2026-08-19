@@ -1,0 +1,110 @@
+local PlayerGui = game.Players.LocalPlayer.PlayerGui
+local UI = {}
+local List = {}
+local guiname
+function UI:CreateWindow(t)
+    if PlayerGui:FindFirstChild(t.GuiName) then
+        return
+    end
+    local Win = {}
+    local gui = Instance.new("ScreenGui", PlayerGui)
+    gui.Name = t.GuiName
+    gui.DisplayOrder = math.huge
+    gui.ResetOnSpawn = false
+    guiname = t.GuiName
+    
+    local Frame = Instance.new("Frame", gui)
+    Frame.Size = UDim2.new(0, 100, 0, 25)
+    Frame.Position = UDim2.new(0.5, -110, 0.5, -70)
+    Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    Frame.BorderSizePixel = 0
+    Frame.Active = true
+    Frame.Draggable = true
+    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 7.5)
+    
+    local label = Instance.new("TextLabel", Frame)
+    label.Size = UDim2.new(0, 100, 0, 20)
+    label.AnchorPoint = Vector2.new(0.5, 0)
+    label.Position = UDim2.new(0.5, 0, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = t.Label
+    label.TextScaled = true
+    label.TextWrapped = true
+    label.TextColor3 = Color3.new(1, 1, 1)
+    
+    function Win:AddToggle(Name, Default, Callback)
+        local Enable = Default
+        local Button = Instance.new("TextButton", Frame)
+        Button.Size = UDim2.new(0, 80, 0, 25)
+        Button.AnchorPoint = Vector2.new(0.5, 0)
+        Button.Position = UDim2.new(0.5, 0, 0, 20 + (#List * 27))
+        Button.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+        Button.Text = Name .. "：关闭"
+        Button.TextColor3 = Color3.new(1, 1, 1)
+        Button.TextScaled = true
+        Button.TextWrapped = true
+        Button.Font = Enum.Font.GothamSemibold
+        Button.BorderSizePixel = 0
+        Instance.new("UICorner", Button).CornerRadius = UDim.new(0, 2.5)
+        Button.MouseButton1Click:Connect(function()
+            Enable = not Enable
+            if Enable then
+                Button.Text = Name .. "：开启"
+                Button.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+            else
+                Button.Text = Name .. "：关闭"
+                Button.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+            end
+            if Callback then
+                Callback(Enable)
+            end
+        end)
+        table.insert(List, Button)
+        Frame.Size = UDim2.new(0, 100, 0, 25 + (#List * 27))
+        return Button
+    end
+    
+    function Win:AddTextBox(Name, Default, Callback)
+        local TextBox = Instance.new("TextBox", Frame)
+        TextBox.Size = UDim2.new(0, 80, 0, 25)
+        TextBox.AnchorPoint = Vector2.new(0.5, 0)
+        TextBox.Position = UDim2.new(0.5, 0, 0, 20 + (#List * 27))
+        TextBox.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+        TextBox.PlaceholderText = Name or ""
+        TextBox.Text = Default or ""
+        TextBox.TextColor3 = Color3.new(1, 1, 1)
+        TextBox.TextScaled = true
+        TextBox.TextWrapped = true
+        TextBox.Font = Enum.Font.GothamSemibold
+        TextBox.BorderSizePixel = 0
+        Instance.new("UICorner", TextBox).CornerRadius = UDim.new(0, 2.5)
+        if Callback then
+            TextBox.FocusLost:Connect(function(enterPressed)
+                Callback(TextBox.Text, enterPressed)
+            end)
+        end
+        table.insert(List, TextBox)
+        Frame.Size = UDim2.new(0, 100, 0, 25 + (#List * 27))
+        return TextBox
+    end
+    
+    return Win
+end
+
+function get()
+    return PlayerGui and guiname and PlayerGui:FindFirstChild(guiname)
+end
+function UI:SetEnabled(Bool)
+    local gui = get()
+    if gui then
+        gui.Enabled = Bool
+    end
+end
+function UI:Unload()
+    local gui = get()
+    if gui then
+        gui:Destroy()
+    end
+end
+
+return UI
